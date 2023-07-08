@@ -1,11 +1,13 @@
 # SCRCgenomics
 Sourcecode for SCRC project.
 
-## the session info where the codes run smoothly.
- sessioninfo::session_info()
+# R session info 
+
+``` r
+sessioninfo::session_info()
 ─ Session info ────────────────────────────────────────────────────────────────────────────────────────────────────────
- setting  value
- version  R version 4.2.1 (2022-06-23)
+setting  value
+version  R version 4.2.1 (2022-06-23)
  os       Ubuntu 20.04.6 LTS
  system   x86_64, linux-gnu
  ui       RStudio
@@ -165,3 +167,5 @@ Sourcecode for SCRC project.
  yaml                          2.3.6     2022-10-18 [1] RSPM (R 4.2.0)
  zlibbioc                      1.44.0    2022-11-01 [1] Bioconductor
  zoo                           1.8-11    2022-09-17 [1] RSPM (R 4.2.0)
+```
+
