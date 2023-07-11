@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 May
+## Tengjia Jiang, 11.07.2023
 ## complexheatmap plot parameters
 library(ggsci)
 library(magrittr)
@@ -7,6 +7,9 @@ library(ComplexHeatmap)
 library(maftools)
 library(scales)
 library(dplyr)
+
+workdir <- "./"
+laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
 
 ## maftools-----------------
 ## maftools plot mutation color 
@@ -44,9 +47,7 @@ res_col <- structure(c("#AB4B52","#1F78B4","#273046"), names=c("DT","PX","third"
 loc_col <- structure(c("#899DA4","#FAD510"), names=c("Left","Right"))
 annotationColor_own <- list(Location = res_col, Primary_loc = loc_col)
 
-laml_clin <- read.delim(paste0(workdir,"multiPrimaryCRC/revised_input_star/laml_clin.txt"),header = T,sep = "\t")
-clin_CH <- laml_clin %>% as.data.frame()
-rownames(clin_CH) <- clin_CH$SamLocation
+clin_CH <- laml_clin 
 
 ha_bl <- HeatmapAnnotation(
   df = clin_CH[,"Location", drop=F],

@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## CNV landscape of top 30 mutant genes
 
 library(ComplexHeatmap)
@@ -12,9 +12,9 @@ library(reshape2)
 library(ggthemr)
 library(gg.gap)
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-
+source(paste0(workdir,"revised_scripts_star/complexheatmap_parameters.R"))
 mat_processed_cnv <- readRDS(paste0(workdir,"revised_input_star/mat_processed_cnv.Rds"))
 mat_processed_cnv[mat_processed_cnv %in% c("nonCNV")] <- ""
 
@@ -72,7 +72,7 @@ col_cnv <- structure(c("#812321","#E5B0B0","#003987","#BACEE9"),
 
 pdf(paste0(workdir,"revised_output_star/CNV_out/driver_gene_cnv_processed_FACET.pdf"),width = 15, height = 5)
 Heatmap(mat_processed_cnv_driver, 
-        column_split = laml_clin$Sample, 
+        column_split = laml_clin$reset_name, 
         cluster_rows = F, cluster_columns = F,
         col = col_own, 
         column_title = "Top 30 events of CNV",

@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## TMB & MSI status
 
 library(dplyr)
@@ -19,25 +19,26 @@ library(table1)
 library(htmltools)
 library(finalfit)
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
 all_cli <- readRDS(paste0(workdir,"revised_input_star/all_cli.Rds"))
 followup_data <- readRDS(paste0(workdir,"revised_input_star/followup_data.Rds"))
+msi_score_res <- readRDS(paste0(workdir, "revised_input_star/msi_score_res.Rds"))
 
 ## TMB------------
 tmb_compare <- laml_clin %>%
-  dplyr::select(Tumor_Sample_Barcode,Location,Sample) %>%
+  dplyr::select(Tumor_Sample_Barcode,Location,reset_name) %>%
   merge(., laml@variants.per.sample, all.x = T) %>%
   dplyr::filter(Location %in% c("PX","DT")) %>%
   dplyr::mutate(Variants = ifelse(is.na(Variants),0,Variants)) %>%
   dplyr::mutate(logTMB = log10(Variants/37+1)) %>%
   dplyr::mutate(TMB = Variants/37)
-P_test_tmb <- reshape2::dcast(tmb_compare, Sample~Location, value.var = "TMB")
+P_test_tmb <- reshape2::dcast(tmb_compare, reset_name ~Location, value.var = "TMB")
 
 tmb_reclass <- tmb_compare %>% 
   dplyr::mutate(TMB = ifelse(TMB > 10, "TMB_H", "TMB_L")) %>%
-  reshape2::dcast(Sample~Location, value.var = "TMB") %>%
+  reshape2::dcast(reset_name~Location, value.var = "TMB") %>%
   dplyr::mutate(CoTMB = case_when(DT == PX & DT == "TMB_H" ~ "TMB_H only",
                                   DT == PX & DT == "TMB_L" ~ "TMB_L only",
                                   DT != PX ~ "TMB_L/TMB_H")) 
@@ -66,10 +67,9 @@ ggthemr_reset()
 dev.off()
 
 ## MSS status-------
-msi_score_res <- readRDS(paste0(workdir, "revised_input_star/msi_score_res.Rds"))
 msi_score <- msi_score_res %>% 
   dplyr::mutate(MSIstatus = ifelse(MSIscore >= 20, "MSI_H", "MSS")) %>% 
-  separate(.,col = "SamLocation", into = c("Sample","Location"), sep = "_", remove = T) %>%
+  separate(.,col = "reset_SamLocation", into = c("Sample","Location"), sep = "_", remove = T) %>%
   dplyr::select(Sample, Location, MSIstatus) %>% 
   dcast(., Sample~Location, value.var = "MSIstatus") %>% 
   dplyr::select(Sample, DT, PX)
@@ -106,7 +106,7 @@ ggthemr_reset()
 dev.off()
 
 ## MSS status & tumor samples location
-msi_score_loc <-  all_cli %>% select(Sample,Tumor_sites) %>% merge(msi_score, .,)
+msi_score_loc <- all_cli %>% select(reset_name,Tumor_sites) %>% merge(msi_score, .,by.x="Sample",by.y="reset_name")
 msi_score_loc <- xtabs(~CoMSI+Tumor_sites, msi_score_loc) %>% as.data.frame()
 msi_score_loc <- ddply(msi_score_loc, "Tumor_sites", transform,
                        percent_freq = round(Freq/sum(Freq)*100,2)) %>%
@@ -139,13 +139,12 @@ ggplot(msi_score_loc, aes(x=Tumor_sites, y=percent_freq,  fill = CoMSI)) +
 ggthemr_reset()
 dev.off()
 
-msi_score_loc_p <-  all_cli %>% select(Sample,Tumor_sites) %>% merge(msi_score, .,)
+msi_score_loc_p <- all_cli %>% select(reset_name,Tumor_sites) %>% merge(msi_score, .,by.x="Sample",by.y="reset_name")
 xtabs(~CoMSI+Tumor_sites, msi_score_loc_p) %>% chisq.test()
 
 ## survival analysis
-msi_cli <- merge(followup_data,msi_score,by.x="NAME",by.y="Sample")
+msi_cli <- merge(followup_data,msi_score,by.x="reset_name",by.y="Sample")
 msi_cli$CoMSI <- factor(msi_cli$CoMSI, ordered = T, levels = c("MSS only","MSS/MSI_H","MSI_H only"))
-
 
 OS_diff_msi_reclass <- survfit(Surv(OS, OS_status)~ CoMSI, data = msi_cli)
 PFS_diff_msi_reclass <- survfit(Surv(PFS, PFS_status)~ CoMSI, data = msi_cli)

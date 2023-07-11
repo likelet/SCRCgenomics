@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## neutral evolution analysis
 
 library(neutralitytestr)
@@ -13,16 +13,15 @@ library(GenomicRanges)
 library(magrittr)
 library(tidyr)
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 NeutralityR2_res <- readRDS(paste0(workdir,"revised_input_star/NeutralityR2_res.Rds"))
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
 math_res_rmCNV <- readRDS(paste0(workdir,"revised_input_star/math_res_rmCNV.Rds"))
 followup_data <- readRDS(paste0(workdir,"revised_input_star/followup_data.Rds"))
 
 ## pie plot-------
-NeutralityR2_res <- merge(NeutralityR2_res, laml_clin[,c("SamLocation","Sample")])
 NeutralIdentical <- function(pat){
-  Neutral_status <- NeutralityR2_res[NeutralityR2_res$Sample == pat,"Neutral_status"] %>% unique()
+  Neutral_status <- NeutralityR2_res[NeutralityR2_res$reset_name == pat,"Neutral_status"] %>% unique()
   
   if(all(Neutral_status == "Yes") == TRUE){
     NeutralStatus <- data.frame(Patient = pat, Neutral_status = "Neutral only")
@@ -33,7 +32,7 @@ NeutralIdentical <- function(pat){
   }
 }
 
-NeutralStatus <- do.call(rbind, lapply(as.list(unique(NeutralityR2_res$Sample)), NeutralIdentical))
+NeutralStatus <- do.call(rbind, lapply(as.list(unique(NeutralityR2_res$reset_name)), NeutralIdentical))
 NeutralStatus <- table(NeutralStatus$Neutral_status) %>% as.data.frame()
 colnames(NeutralStatus) <- c("NeutralStatus","Num")
 
@@ -57,8 +56,8 @@ ggplot(NeutralStatus, aes(x = "",y = Num, fill = NeutralStatus)) +
 ggthemr_reset()
 dev.off()
 
-## bos plot---------
-evol_MATH <- merge(NeutralityR2_res, math_res_rmCNV, by.x = "SamLocation", by.y = "Sample")
+## box plot---------
+evol_MATH <- merge(NeutralityR2_res, math_res_rmCNV, by = "reset_SamLocation")
 
 pdf(paste0(workdir,"revised_output_star/evolution/neutral_MATH_compare.pdf"),width = 5, height = 7)
 ggplot(evol_MATH, aes(x=Neutral_status,y=MATH,color=Neutral_status))+
@@ -82,12 +81,12 @@ nonneutral_math <- evol_MATH %>% dplyr::filter(Neutral_status == "No") %>% dplyr
 wilcox.test(neutral_math$MATH, nonneutral_math$MATH, paired = F, alternative = "greater")
 
 ## survival analysis------
-PaNeutralStatus <- do.call(rbind, lapply(as.list(unique(NeutralityR2_res$Sample)), NeutralIdentical)) %>%
+PaNeutralStatus <- do.call(rbind, lapply(as.list(unique(NeutralityR2_res$reset_name)), NeutralIdentical)) %>%
   mutate(Neutral_status_reclas =  ifelse(Neutral_status %in% c("Different","Neutral only"), 
                                          "other", "non_Neutral only"))
 
-surv_CRC <- followup_data %>%
-  merge(., PaNeutralStatus,by.x="NAME",by.y="Patient")
+surv_CRC <- unique(followup_data) %>%
+  merge(., PaNeutralStatus,by.x="reset_name",by.y="Patient")
 
 OS_diff <- survfit(Surv(OS, OS_status)~ Neutral_status, data = surv_CRC)
 PFS_diff <- survfit(Surv(PFS, PFS_status)~ Neutral_status, data = surv_CRC)

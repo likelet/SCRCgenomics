@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## mutation landscape of top 30 mutant genes
 
 library(ComplexHeatmap)
@@ -12,10 +12,11 @@ library(reshape2)
 library(ggthemr)
 library(gg.gap)
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 mat_processed_mut <- readRDS(paste0(workdir,"revised_input_star/mat_processed_mut.Rds"))
 laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
+source(paste0(workdir,"revised_scripts_star/complexheatmap_parameters.R"))
 
 top_mutated_gene <- laml@gene.summary$Hugo_Symbol %>% head(30)
 select_mutgene <- intersect(rownames(mat_processed_mut), top_mutated_gene)
@@ -67,7 +68,7 @@ mut_type_perGene <- MuttypeBarplot(margin_value = 1)
 
 pdf(paste0(workdir,"revised_output_star/somatic_mut/top_gene_mutation_processed.pdf"),width = 20, height = 10)
 Heatmap(mat_processed_mut_driver, 
-        column_split = laml_clin$Sample, 
+        column_split = laml_clin$reset_name, 
         cluster_rows = F, cluster_columns = F,
         col = col_own, 
         column_title = "Top 30 events of mutation",
@@ -105,10 +106,11 @@ dev.off()
 mut_location_prop <- laml@data %>% 
   dplyr::select(Hugo_Symbol,Tumor_Sample_Barcode) %>%
   dplyr::filter(Hugo_Symbol %in% rownames(mat_processed_mut_driver)) %>%
-  merge(., laml_clin[,c("Tumor_Sample_Barcode","Location","Sample")], by = "Tumor_Sample_Barcode", all.y = T) %>% 
+  merge(., laml_clin[,c("reset_SamLocation","Location","reset_name")], 
+        by.x = "Tumor_Sample_Barcode", by.y="reset_SamLocation",all.y = T) %>% 
   unique() %>%
   dplyr::filter(Location %in% c("DT","PX")) %>%
-  dcast(Hugo_Symbol ~ Sample, value.var = "Location") %>%
+  dcast(Hugo_Symbol ~ reset_name, value.var = "Location") %>%
   reshape2::melt(id.vars = "Hugo_Symbol") %>%
   dplyr::mutate(value = case_when(
     value == 0 ~ "Neither",
@@ -211,8 +213,10 @@ all_mut <- laml@variant.classification.summary[,1:10] %>%
 all_TMB <- aggregate(value~Tumor_Sample_Barcode, data = all_mut, FUN = sum) %>%
   dplyr::mutate(TMB = value/37) %>%
   merge(., laml_clin, by = "Tumor_Sample_Barcode", all = T) %>%
-  dplyr::arrange(Tumor_Sample_Barcode) %>%
-  dplyr::filter(Location != "third")
+  dplyr::filter(Location != "third") %>%
+  dplyr::mutate(order = substr(reset_name,start = 2,stop = 3) %>% as.numeric()) %>%
+  dplyr::arrange(order,Location)
+
 
 pdf(paste0(workdir, "revised_output_star/somatic_mut/all_TMB_barplot.pdf"), width = 9,height = 4)
 ggthemr("fresh")
@@ -225,11 +229,11 @@ all_tmb_plot <- ggplot(all_TMB, aes(x=reset_name, y=TMB, fill=Location)) +
         axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12))+
   scale_y_continuous(expand = c(0,0), breaks = seq(0,200,20))+
-  scale_x_discrete(limits = levels(all_TMB$Sample), labels = unique(all_TMB$reset_name))
+  scale_x_discrete(limits = levels(all_TMB$reset_name), labels = unique(all_TMB$reset_name))
 gg.gap(plot = all_tmb_plot, 
-       segments = c(80,110), #截断区域的纵坐标
-       ylim = c(0,140), #纵坐标的总长度
-       tick_width = c(20,30), #上层和下层分别的纵坐标间隔值
-       rel_heights = c(0.4,0.00001,0.1)) # 底层、截断层、上层在纵轴上所占的比例
+       segments = c(80,110), 
+       ylim = c(0,140), 
+       tick_width = c(20,30), 
+       rel_heights = c(0.4,0.00001,0.1)) 
 ggthemr_reset()
 dev.off()

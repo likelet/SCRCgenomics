@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## SCRC & solitary comparison
 
 library(magrittr)
@@ -18,7 +18,7 @@ library(ggthemr)
 library(gg.gap)
 library(cowplot)
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
 all_cli <- readRDS(paste0(workdir,"revised_input_star/all_cli.Rds"))
@@ -31,8 +31,8 @@ oncokb_maf_tcga <- readRDS(paste0(workdir,"revised_input_star/oncokb_maf_tcga.Rd
 
 ## SCRC data
 scrc_surv <- followup_data %>%
-  dplyr::filter(NAME %in% unique(laml_clin$Sample)) %>%
-  dplyr::select(NAME,OS_status,OS) %>%
+  dplyr::filter(reset_name %in% unique(laml_clin$reset_name)) %>%
+  dplyr::select(reset_name,OS_status,OS) %>%
   dplyr::mutate(group="SCRC")
 
 ## TCGA data
@@ -53,7 +53,7 @@ OS_data_TCGA <- tcga_laml@clinical.data %>%
 tcga_os <- OS_data_TCGA %>%
   dplyr::select(Tumor_Sample_Barcode,Osstatus,OS) %>%
   dplyr::mutate(group = "TCGA") 
-colnames(tcga_os) <- c("NAME", "OS_status", "OS", "group")
+colnames(tcga_os) <- c("reset_name", "OS_status", "OS", "group")
 
 SCRC_solitary_tcga <- rbind(scrc_surv, tcga_os) %>%
   dplyr::mutate(group = factor(group, levels = c("SCRC","TCGA")))
@@ -164,7 +164,7 @@ ggplot(pathmut_compare_tcga, aes(Path, Prop, fill = group)) +
   scale_x_discrete(limits = rev(pathmut_order_tcga$Path))+
   labs(y = 'Percent of case',x = "") +
   geom_hline(yintercept = 0, size = 0.3) +
-  guides(fill=F)+  #去除legend
+  guides(fill=F)+  
   scale_y_continuous(breaks = seq(-90, 90, 20), labels = as.character(abs(seq(-90, 90, 20))), limits = c(-90, 90)) +
   annotate('text', label = 'SCRC (N=103)', 1, -60) +
   annotate('text', label = 'TCGA (N=489)', 1, 60) +
@@ -178,7 +178,7 @@ ggplot(pathmut_compare_tcga, aes(Path, Prop, fill = group)) +
 dev.off()
 tcga_laml@clinical.data %>% head()
 
-## chisquare test
+## chi-square test
 PathMutDiff <- function(path){
   print(path)
   scrc_path_mut <- pathmut_compare_tcga %>% dplyr::filter(Path == path & group == "SCRC") 

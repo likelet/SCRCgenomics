@@ -1,4 +1,4 @@
-## Tengjia Jiang, 2023 July
+## Tengjia Jiang, 11.07.2023
 ## mutation signature
 
 library(magrittr)
@@ -14,7 +14,7 @@ library(wesanderson)
 library(MutationalPatterns)
 
 
-workdir <- "/home/rstudio/storage-and-archive/multiple_primaryCRC/revised_process/multiPrimaryCRC/"
+workdir <- "./"
 laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
 mut_mat <- readRDS(paste0(workdir,"revised_input_star/NMF_rank_all.Rds"))
 estimate <- readRDS(paste0(workdir,"revised_input_star/estimate_all.Rds"))
@@ -47,7 +47,7 @@ sig_prop <- nmf_res$contribution %>%
   reshape2::melt(., id.vars = "Signature") %>%
   ddply("variable", transform, percent_freq = round(value / sum(value) * 100,2)) %>%
   ddply("variable", transform, percent_freq_label = round(cumsum(percent_freq),2)) %>%
-  merge(., unique(laml_clin[c("reset_SamLocation","SamLocation","Primary_loc","reset_name")]), by.x = "variable", by.y = "reset_SamLocation", all = T) 
+  merge(., unique(laml_clin[c("reset_SamLocation","Primary_loc","reset_name")]), by.x = "variable", by.y = "reset_SamLocation", all = T) 
 sig_prop$reset_name <- sub(pattern = "P",replacement = "",x = sig_prop$reset_name)
 sig_prop$reset_name <- as.integer(sig_prop$reset_name)
 sig_prop <- sig_prop %>%
