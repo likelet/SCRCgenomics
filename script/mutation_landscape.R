@@ -214,6 +214,7 @@ all_TMB <- aggregate(value~Tumor_Sample_Barcode, data = all_mut, FUN = sum) %>%
   dplyr::mutate(TMB = value/37) %>%
   merge(., laml_clin, by = "Tumor_Sample_Barcode", all = T) %>%
   dplyr::filter(Location != "third") %>%
+  dplyr::filter(!is.na(value)) %>%
   dplyr::mutate(order = substr(reset_name,start = 2,stop = 3) %>% as.numeric()) %>%
   dplyr::arrange(order,Location)
 
