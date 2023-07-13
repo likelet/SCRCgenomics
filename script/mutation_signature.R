@@ -15,12 +15,12 @@ library(MutationalPatterns)
 
 
 workdir <- "./"
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-mut_mat <- readRDS(paste0(workdir,"revised_input_star/NMF_rank_all.Rds"))
-estimate <- readRDS(paste0(workdir,"revised_input_star/estimate_all.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+mut_mat <- readRDS(paste0(workdir,"input/NMF_rank_all.Rds"))
+estimate <- readRDS(paste0(workdir,"input/estimate_all.Rds"))
 
 
-pdf(paste0(workdir,"revised_output_star/signature/NMF_rank_all.pdf"))
+pdf(paste0(workdir,"output/signature/NMF_rank_all.pdf"))
 plot(estimate)
 dev.off()
 
@@ -31,7 +31,7 @@ colnames(nmf_res$signatures) <- paste0("Signature_",LETTERS[1:k.best])
 rownames(nmf_res$contribution) <- paste0("Signature_",LETTERS[1:k.best])
 
 ## visualize signature
-pdf(paste0(workdir,"revised_output_star/signature/signature_all.pdf"), width = 5, height = 2.5)
+pdf(paste0(workdir,"output/signature/signature_all.pdf"), width = 5, height = 2.5)
 plot_96_profile(nmf_res$signatures)
 dev.off()
 
@@ -59,7 +59,7 @@ sig_prop <- sig_prop %>%
 sig_prop$variable <- factor(sig_prop$variable, levels = unique(sig_prop$variable))
 
 
-pdf(paste0(workdir, "revised_output_star/signature/signature_bar_percentage_left_right_all.pdf"), width = 10,height = 3)
+pdf(paste0(workdir, "output/signature/signature_bar_percentage_left_right_all.pdf"), width = 10,height = 3)
 ggplot(sig_prop, aes(x=variable, y=percent_freq,  fill = Signature)) + 
   geom_bar(stat = "identity", width = 1, color = "#393e46")+
   scale_fill_manual(
