@@ -20,10 +20,10 @@ library(survminer)
 library(ggrepel)
 
 workdir <- "./"
-laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-all_cli <- readRDS(paste0(workdir,"revised_input_star/all_cli.Rds"))
-ClonalityWithdraw_res <- readRDS(paste0(workdir,"revised_input_star/ClonalityWithdraw_res.Rds"))
+laml <- readRDS(paste0(workdir,"input/laml.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+all_cli <- readRDS(paste0(workdir,"input/all_cli.Rds"))
+ClonalityWithdraw_res <- readRDS(paste0(workdir,"input/ClonalityWithdraw_res.Rds"))
 
 ## mutation share details venn plots------
 mutation_share <- laml@data %>% as.data.frame() %>% 
@@ -107,7 +107,7 @@ gs <- lapply(unique(laml_clin$reset_name), function(patient){
   
 })
 
-pdf(file=paste0(workdir, "revised_output_star/mutation_share/combind_VennDiagram.pdf"), width = 20,height = 25)
+pdf(file=paste0(workdir, "output/mutation_share/combind_VennDiagram.pdf"), width = 20,height = 25)
 grid.arrange(grobs = gs, ncol = 6,
              top = "mutation shared by multi-samples")
 dev.off()
@@ -129,7 +129,7 @@ share_GENE <-do.call(rbind, lapply(as.list(unique(laml_clin$reset_name)), share_
 colnames(share_GENE) <- c("patient","id")
 gene_share <- share_GENE %>% separate(col = "id", into = "gene", remove = F)
 
-drivergene <- read.delim(paste0(workdir,"revised_input_star/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
+drivergene <- read.delim(paste0(workdir,"input/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
 gene_share <- gene_share %>% dplyr::mutate(isDriver = ifelse(gene %in% drivergene$gene, "Driver", "no"))
 
 mutation_share_upset <- mutation_share %>% 
@@ -173,7 +173,7 @@ pat_order <- itt %>% dplyr::select(Patient,intersect_type,percent_freq) %>%
   dplyr::arrange(desc(PX_DT),desc(DT_only))
 
 
-pdf(paste0(workdir, "revised_output_star/mutation_share/share_proportion_barplot.pdf"), width = 7,height = 2)
+pdf(paste0(workdir, "output/mutation_share/share_proportion_barplot.pdf"), width = 7,height = 2)
 ggthemr("fresh")
 ggplot(itt, aes(x=Patient, y=percent_freq, fill=intersect_type)) +
   geom_bar(stat = "identity")+
@@ -191,7 +191,7 @@ ggthemr_reset()
 dev.off()
 
 ## clonal driver gene locus-------
-drivergene <- read.delim(paste0(workdir,"revised_input_star/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
+drivergene <- read.delim(paste0(workdir,"input/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
 clonality_patient <- ClonalityWithdraw_res %>% 
   merge(., laml_clin[c("BAM_name","reset_SamLocation","Location","reset_name")], by.x = "sample", by.y = "BAM_name", all.x = T) %>% tidyr::unite(., col = patient_gene, c("reset_name","Hugo_Symbol"), sep = "_", remove = F) %>%
   tidyr::unite(., col = patient_gene_id, c("patient_gene","Start_position"), sep = "_", remove = T) 
@@ -236,7 +236,7 @@ for (samp in c("P48","P11","P37","P2")) {
   plotList[[samp]] <- p
 }
 
-pdf(paste0(workdir,"revised_output_star/clonality/Clonality_compare_of_sharegene.pdf"),width = 5, height = 5)
+pdf(paste0(workdir,"output/clonality/Clonality_compare_of_sharegene.pdf"),width = 5, height = 5)
 multiplot(plotlist = plotList, cols = 2)
 dev.off()
 
