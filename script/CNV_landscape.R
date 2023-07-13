@@ -13,9 +13,9 @@ library(ggthemr)
 library(gg.gap)
 
 workdir <- "./"
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-source(paste0(workdir,"revised_scripts_star/complexheatmap_parameters.R"))
-mat_processed_cnv <- readRDS(paste0(workdir,"revised_input_star/mat_processed_cnv.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+source(paste0(workdir,"script/complexheatmap_parameters.R"))
+mat_processed_cnv <- readRDS(paste0(workdir,"input/mat_processed_cnv.Rds"))
 mat_processed_cnv[mat_processed_cnv %in% c("nonCNV")] <- ""
 
 altered_nums_cnv <- apply(mat_processed_cnv, 1, function(x){length(x)-sum(x=="")})
@@ -70,7 +70,7 @@ cnv_type_perGene <- CnvtypeBarplot(margin_value = 1, classified = 4)
 col_cnv <- structure(c("#812321","#E5B0B0","#003987","#BACEE9"), 
                      names=c('Amplification', 'Gain', 'Deletion', 'Loss'))
 
-pdf(paste0(workdir,"revised_output_star/CNV_out/driver_gene_cnv_processed_FACET.pdf"),width = 15, height = 5)
+pdf(paste0(workdir,"output/CNV_out/driver_gene_cnv_processed_FACET.pdf"),width = 15, height = 5)
 Heatmap(mat_processed_cnv_driver, 
         column_split = laml_clin$reset_name, 
         cluster_rows = F, cluster_columns = F,
