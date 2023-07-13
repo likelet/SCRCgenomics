@@ -13,10 +13,10 @@ library(ggthemr)
 library(gg.gap)
 
 workdir <- "./"
-mat_processed_mut <- readRDS(paste0(workdir,"revised_input_star/mat_processed_mut.Rds"))
-laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-source(paste0(workdir,"revised_scripts_star/complexheatmap_parameters.R"))
+mat_processed_mut <- readRDS(paste0(workdir,"input/mat_processed_mut.Rds"))
+laml <- readRDS(paste0(workdir,"input/laml.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+source(paste0(workdir,"script/complexheatmap_parameters.R"))
 
 top_mutated_gene <- laml@gene.summary$Hugo_Symbol %>% head(30)
 select_mutgene <- intersect(rownames(mat_processed_mut), top_mutated_gene)
@@ -66,7 +66,7 @@ mut_type_perSample <- MuttypeBarplot(margin_value = 2)
 mut_type_perGene <- MuttypeBarplot(margin_value = 1)
 
 
-pdf(paste0(workdir,"revised_output_star/somatic_mut/top_gene_mutation_processed.pdf"),width = 20, height = 10)
+pdf(paste0(workdir,"output/somatic_mut/top_gene_mutation_processed.pdf"),width = 20, height = 10)
 Heatmap(mat_processed_mut_driver, 
         column_split = laml_clin$reset_name, 
         cluster_rows = F, cluster_columns = F,
@@ -129,7 +129,7 @@ LocShareMuttype <- function(gene){
 }
 loc_muttype_res <- do.call(rbind, lapply(as.list(rownames(mat_processed_mut_driver)), LocShareMuttype))
 
-pdf(paste0(workdir, "revised_output_star/somatic_mut/top_gene_mutation_share.pdf"), width = 3,height = 6)
+pdf(paste0(workdir, "output/somatic_mut/top_gene_mutation_share.pdf"), width = 3,height = 6)
 ggthemr("fresh")
 ggplot(loc_muttype_res, aes(x=Gene, y=Freq,  fill = Mutant_type)) + 
   geom_bar(stat = "identity",width = 0.6)+
@@ -152,7 +152,7 @@ ggthemr_reset()
 dev.off()
 
 ## driver gene difference between left and right sides of colon-------
-drivergene <- read.delim(paste0(workdir,"revised_input_star/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
+drivergene <- read.delim(paste0(workdir,"input/DriverDBv3_COAD.txt"),header = T,sep = "\t",stringsAsFactors = F)
 select_mutgene <- intersect(rownames(mat_processed_mut), drivergene$gene)
 mat_processed_mut_driver <- mat_processed_mut[select_mutgene,]
 
@@ -181,7 +181,7 @@ left_right_mut <- rbind(left_mut, right_mut) %>%
   dplyr::mutate(label_prop = paste0(Mut_rate,"%")) %>% dplyr::arrange(desc(group),desc(Mut_rate))
 mut_order <- left_right_mut %>% dplyr::filter(group == "Left") %>% dplyr::select(Hugo_Symbol)
 
-pdf(paste0(workdir, "revised_output_star/somatic_mut/driver_left_right_compare.pdf"), width = 7,height = 3)
+pdf(paste0(workdir, "output/somatic_mut/driver_left_right_compare.pdf"), width = 7,height = 3)
 ggthemr("fresh")
 ggplot(left_right_mut, aes(x=Hugo_Symbol, y=Mut_rate, fill=group)) +
   geom_bar(stat = "identity",colour="#393e46", width = 0.7, position = "dodge")+
@@ -219,7 +219,7 @@ all_TMB <- aggregate(value~Tumor_Sample_Barcode, data = all_mut, FUN = sum) %>%
   dplyr::arrange(order,Location)
 
 
-pdf(paste0(workdir, "revised_output_star/somatic_mut/all_TMB_barplot.pdf"), width = 9,height = 4)
+pdf(paste0(workdir, "output/somatic_mut/all_TMB_barplot.pdf"), width = 9,height = 4)
 ggthemr("fresh")
 all_tmb_plot <- ggplot(all_TMB, aes(x=reset_name, y=TMB, fill=Location)) +
   geom_bar(stat = "identity", color = "#393e46")+
