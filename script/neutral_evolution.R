@@ -14,10 +14,10 @@ library(magrittr)
 library(tidyr)
 
 workdir <- "./"
-NeutralityR2_res <- readRDS(paste0(workdir,"revised_input_star/NeutralityR2_res.Rds"))
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-math_res_rmCNV <- readRDS(paste0(workdir,"revised_input_star/math_res_rmCNV.Rds"))
-followup_data <- readRDS(paste0(workdir,"revised_input_star/followup_data.Rds"))
+NeutralityR2_res <- readRDS(paste0(workdir,"input/NeutralityR2_res.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+math_res_rmCNV <- readRDS(paste0(workdir,"input/math_res_rmCNV.Rds"))
+followup_data <- readRDS(paste0(workdir,"input/followup_data.Rds"))
 
 ## pie plot-------
 NeutralIdentical <- function(pat){
@@ -40,7 +40,7 @@ colnames(NeutralStatus) <- c("NeutralStatus","Num")
 myLabel <- NeutralStatus$Num
 myLabel <- paste0(myLabel, "(", round(NeutralStatus$Num / sum(NeutralStatus$Num ) * 100, 2), "%)") 
 
-pdf(paste0(workdir, "revised_output_star/evolution/neutralStatus.pdf"), width = 5,height = 5)
+pdf(paste0(workdir, "output/evolution/neutralStatus.pdf"), width = 5,height = 5)
 ggthemr("fresh")
 ggplot(NeutralStatus, aes(x = "",y = Num, fill = NeutralStatus)) +
   geom_bar(stat="identity",width=1) +
@@ -59,7 +59,7 @@ dev.off()
 ## box plot---------
 evol_MATH <- merge(NeutralityR2_res, math_res_rmCNV, by = "reset_SamLocation")
 
-pdf(paste0(workdir,"revised_output_star/evolution/neutral_MATH_compare.pdf"),width = 5, height = 7)
+pdf(paste0(workdir,"output/evolution/neutral_MATH_compare.pdf"),width = 5, height = 7)
 ggplot(evol_MATH, aes(x=Neutral_status,y=MATH,color=Neutral_status))+
   geom_boxplot(outlier.size=0, size=0.9, width=0.6,fill="white")+
   geom_point(size=5)+
@@ -115,7 +115,7 @@ splots[[2]] <- ggsurvplot(PFS_diff, data = surv_CRC,
                           risk.table.y.text = F, 
                           xlab = "PFS (months)")
 surres <- arrange_ggsurvplots(splots, print = T, ncol = 2, nrow = 1, risk.table.height = 0.3)
-ggsave(paste0(workdir,"revised_output_star/evolution/survival_3_neutral_pattern.pdf"),
+ggsave(paste0(workdir,"output/evolution/survival_3_neutral_pattern.pdf"),
        plot = surres, width = 7, height = 5)
 
 # 2 groups
@@ -139,7 +139,7 @@ splots_reclass[[2]] <- ggsurvplot(PFS_diff_reclass, data = surv_CRC,
                                   risk.table.y.text = F, 
                                   xlab = "PFS (months)")
 surres_reclass <- arrange_ggsurvplots(splots_reclass, print = T, ncol = 2, nrow = 1, risk.table.height = 0.3)
-ggsave(paste0(workdir,"revised_output_star/evolution/survival_2_neutral_pattern.pdf"),
+ggsave(paste0(workdir,"output/evolution/survival_2_neutral_pattern.pdf"),
        plot = surres_reclass, width = 7, height = 5)
 
 
