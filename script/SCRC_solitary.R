@@ -19,14 +19,14 @@ library(gg.gap)
 library(cowplot)
 
 workdir <- "./"
-laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-all_cli <- readRDS(paste0(workdir,"revised_input_star/all_cli.Rds"))
-tcga_laml <- readRDS(paste0(workdir,"revised_input_star/tcga_laml.Rds"))
-followup_data <- readRDS(paste0(workdir,"revised_input_star/followup_data.Rds"))
-path_sum <- readRDS(paste0(workdir,"revised_input_star/path_sum.Rds"))
-oncokb_maf <- readRDS(paste0(workdir,"revised_input_star/oncokb_maf.Rds"))
-oncokb_maf_tcga <- readRDS(paste0(workdir,"revised_input_star/oncokb_maf_tcga.Rds"))
+laml <- readRDS(paste0(workdir,"input/laml.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+all_cli <- readRDS(paste0(workdir,"input/all_cli.Rds"))
+tcga_laml <- readRDS(paste0(workdir,"input/tcga_laml.Rds"))
+followup_data <- readRDS(paste0(workdir,"input/followup_data.Rds"))
+path_sum <- readRDS(paste0(workdir,"input/path_sum.Rds"))
+oncokb_maf <- readRDS(paste0(workdir,"input/oncokb_maf.Rds"))
+oncokb_maf_tcga <- readRDS(paste0(workdir,"input/oncokb_maf_tcga.Rds"))
 
 
 ## SCRC data
@@ -62,7 +62,7 @@ OS_diff_SCRC_soli_tcga <- survfit(Surv(OS, OS_status)~ group, data = SCRC_solita
 survdiff(Surv(OS, OS_status)~ group, data = SCRC_solitary_tcga)
 
 
-pdf(paste0(workdir,"revised_output_star/SCRC_solitary/SCRC_solitary_survival_tcga.pdf"), width = 3, height = 4)
+pdf(paste0(workdir,"output/SCRC_solitary/SCRC_solitary_survival_tcga.pdf"), width = 3, height = 4)
 p3 <- ggsurvplot(OS_diff_SCRC_soli_tcga, data = SCRC_solitary_tcga,
                  fun = "pct",conf.int = F, pval = T,
                  tables.height = 0.3,
@@ -89,7 +89,7 @@ diff_mut_gene_seprate <- mut_freq %>%
 path_order_seprate <- merge(path_sum, diff_mut_gene_seprate, by.x = "Gene", by.y = "Hugo_Symbol") %>% dplyr::arrange(Pathway)
 mut_freq <- mut_freq %>% dplyr::filter(Hugo_Symbol %in% path_order_seprate$Gene)
 
-pdf(paste0(workdir, "revised_output_star/SCRC_solitary/SCRC_TCGA_mut_persample.pdf"), width = 4,height = 5)
+pdf(paste0(workdir, "output/SCRC_solitary/SCRC_TCGA_mut_persample.pdf"), width = 4,height = 5)
 coBarplot(m1 = laml, m2 = tcga_laml, 
           genes = path_order_seprate$Gene, 
           m1Name = "SCRC", m2Name = "TCGA",
@@ -120,7 +120,7 @@ tcga_scrc_tmb_p <- ggplot(tcga_scrc_tmb,aes(x=group,y=logTMB, fill = group))+
   scale_fill_manual(breaks = c("SCRC","TCGA"), values = c("#CE364F","#86A875"))+
   scale_y_continuous(breaks = c(seq(0,3,0.5)), expand = c(0,0))+
   scale_x_discrete(breaks = c("SCRC","TCGA"), labels = c("SCRC\n(N=103)","TCGA\n(N=489)"))
-ggsave(paste0(workdir,"revised_output_star/SCRC_solitary/TCGA_SCRC_tmb_raincloud.pdf"), width = 4, height = 4.5)
+ggsave(paste0(workdir,"output/SCRC_solitary/TCGA_SCRC_tmb_raincloud.pdf"), width = 4, height = 4.5)
 
 t.test(tcga_tmb$TMB, scrc_tmb$TMB, paired = F, alternative = "two.sided")
 
@@ -153,7 +153,7 @@ pathmut_tcga <- do.call(rbind, lapply(as.list(unique(path_oncokb_tcga$Pathway)),
 pathmut_compare_tcga <- rbind(pathmut_scrc, pathmut_tcga) 
 pathmut_order_tcga <- pathmut_compare_tcga %>% dplyr::filter(group == "SCRC") %>% dplyr::arrange(Prop)
 
-pdf(paste0(workdir, "revised_output_star/SCRC_solitary/SCRC_TCGA_pathway.pdf"), width = 4,height = 4)
+pdf(paste0(workdir, "output/SCRC_solitary/SCRC_TCGA_pathway.pdf"), width = 4,height = 4)
 ggplot(pathmut_compare_tcga, aes(Path, Prop, fill = group)) +
   geom_col(position = position_dodge(width = 0), 
            width = 1.2, size = 0.3, colour = 'black') +
