@@ -20,11 +20,11 @@ library(htmltools)
 library(finalfit)
 
 workdir <- "./"
-laml <- readRDS(paste0(workdir,"revised_input_star/laml.Rds"))
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
-all_cli <- readRDS(paste0(workdir,"revised_input_star/all_cli.Rds"))
-followup_data <- readRDS(paste0(workdir,"revised_input_star/followup_data.Rds"))
-msi_score_res <- readRDS(paste0(workdir, "revised_input_star/msi_score_res.Rds"))
+laml <- readRDS(paste0(workdir,"input/laml.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
+all_cli <- readRDS(paste0(workdir,"input/all_cli.Rds"))
+followup_data <- readRDS(paste0(workdir,"input/followup_data.Rds"))
+msi_score_res <- readRDS(paste0(workdir, "input/msi_score_res.Rds"))
 
 ## TMB------------
 tmb_compare <- laml_clin %>%
@@ -50,7 +50,7 @@ colnames(tmb_score_table) <- c("tmb_type","Num")
 tmbLabel <- tmb_score_table$Num
 tmbLabel <- paste0(tmbLabel, "(", round(tmb_score_table$Num / sum(tmb_score_table$Num ) * 100, 2), "%)") 
 
-pdf(paste0(workdir, "revised_output_star/somatic_mut/tmb_score_summary_pie.pdf"), width = 5,height = 5)
+pdf(paste0(workdir, "output/somatic_mut/tmb_score_summary_pie.pdf"), width = 5,height = 5)
 ggthemr("fresh")
 ggplot(tmb_score_table, aes(x = "",y = Num, fill = tmb_type)) +
   geom_bar(stat="identity",width=1) +
@@ -89,7 +89,7 @@ colnames(msi_score_table) <- c("MSI_type","Num")
 
 msiLabel <- msi_score_table$Num
 msiLabel <- paste0(msiLabel, "(", round(msi_score_table$Num / sum(msi_score_table$Num ) * 100, 2), "%)") 
-pdf(paste0(workdir, "revised_output_star/MSI_status/MSI_score_summary_pie.pdf"), width = 5,height = 5)
+pdf(paste0(workdir, "output/MSI_status/MSI_score_summary_pie.pdf"), width = 5,height = 5)
 ggthemr("fresh")
 ggplot(msi_score_table, aes(x = "",y = Num, fill = MSI_type)) +
   geom_bar(stat="identity",width=1) +
@@ -118,7 +118,7 @@ msi_score_loc$CoMSI <- factor(msi_score_loc$CoMSI,
                               levels = rev(c("MSI_H only","MSS only","MSS/MSI_H")))
 
 #### stacked bar plot
-pdf(paste0(workdir, "revised_output_star/MSI_status/MSI_score_location_bar_percentage.pdf"), width = 7,height = 4)
+pdf(paste0(workdir, "output/MSI_status/MSI_score_location_bar_percentage.pdf"), width = 7,height = 4)
 ggthemr("fresh")
 ggplot(msi_score_loc, aes(x=Tumor_sites, y=percent_freq,  fill = CoMSI)) + 
   geom_bar(stat = "identity", width = 0.6)+
@@ -172,7 +172,7 @@ msi_splots_reclass[[2]] <- ggsurvplot(PFS_diff_msi_reclass, data = msi_cli,
                                       risk.table.y.text = F, 
                                       xlab = "Progression-free survival (months)")
 msi_surres_reclass <- arrange_ggsurvplots(msi_splots_reclass, print = T, ncol = 2, nrow = 1, risk.table.height = 0.3)
-ggsave(paste0(workdir,"revised_output_star/MSI_status/msi_reclass_survival_plot.pdf"),
+ggsave(paste0(workdir,"output/MSI_status/msi_reclass_survival_plot.pdf"),
        plot = msi_surres_reclass, width = 7, height = 5)
 
 ## MSS status & left/right location
@@ -191,7 +191,7 @@ msi_pri_loc <- xtabs(~MSIgroup+Primary_loc, data = msi_pri_loc) %>%
 
 msi_pri_loc$MSIgroup <- factor(msi_pri_loc$MSIgroup, ordered = T,levels = rev(c("MSI-H","MSS")))
 
-pdf(paste0(workdir, "revised_output_star/MSI_status/MSI_location_bar_percentage.pdf"), width = 3.5,height = 3.5)
+pdf(paste0(workdir, "output/MSI_status/MSI_location_bar_percentage.pdf"), width = 3.5,height = 3.5)
 ggthemr("fresh")
 ggplot(msi_pri_loc, aes(x=Primary_loc, y=percent_freq,  fill = MSIgroup)) + 
   geom_bar(stat = "identity", width = 0.6)+
