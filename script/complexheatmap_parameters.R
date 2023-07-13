@@ -9,7 +9,7 @@ library(scales)
 library(dplyr)
 
 workdir <- "./"
-laml_clin <- readRDS(paste0(workdir,"revised_input_star/laml_clin.Rds"))
+laml_clin <- readRDS(paste0(workdir,"input/laml_clin.Rds"))
 
 ## maftools-----------------
 ## maftools plot mutation color 
